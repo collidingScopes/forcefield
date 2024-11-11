@@ -3,9 +3,8 @@ To do:
 Implement dat.gui styling on the right side
 Add footer and about section / coffee link
 Test mobile functionality
+- Touch and drag on mobile doesn't work
 Resize based on max height as well
-Check how the initial canvas pixel positions are done -- why doesn't it line up exactly with the original image??
-- For above, perhaps there are some pixel position rounding issues
 Ability to reduce screen flickering when there are many particles -- perhaps set a max particle count? 
 Re-order the GUI -- perhaps canvas size / # particles should be moved out the GUI and displayed in small font near the canvas
 Implement image / video record buttons and hotkeys
@@ -17,6 +16,8 @@ Add min width/height and size up the picture if necessary
 
 <!DOCTYPE html>
 <html lang="en">
+<title>Image to Particle Animation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <head>
     <title>Image to Particle Animation</title>
     <style>
@@ -89,6 +90,7 @@ Add min width/height and size up the picture if necessary
             /* image-rendering: pixelated; */
             cursor: crosshair;
             border: 1px solid rgb(245, 242, 227);
+            touch-action: none; /* Prevent default touch behaviors */
         }
 
         #particleCount {
@@ -229,8 +231,9 @@ Add min width/height and size up the picture if necessary
         let animationId;
         let currentImage = null;
         const canvasMetrics = {};
-        const MAX_WIDTH = 800;
         let frameCounter = 0;
+        const MIN_DIMENSION = 500;
+        const MAX_DIMENSION = 1000;
 
         // Info screen functions
         function closeInfoScreen() {
@@ -244,19 +247,58 @@ Add min width/height and size up the picture if necessary
 
         function resizeImage(image) {
             const tempCanvas = document.createElement('canvas');
+            
+            // Calculate aspect ratio
+            const aspectRatio = image.width / image.height;
+            
+            // Initialize new dimensions
             let newWidth = image.width;
             let newHeight = image.height;
-
-            if (newWidth > MAX_WIDTH) {
-                const ratio = MAX_WIDTH / newWidth;
-                newWidth = MAX_WIDTH;
-                newHeight = Math.round(image.height * ratio);
+            
+            // First, handle minimum dimensions
+            if (newWidth < MIN_DIMENSION || newHeight < MIN_DIMENSION) {
+                if (aspectRatio > 1) {
+                    // Image is wider than tall
+                    if (newHeight < MIN_DIMENSION) {
+                        newHeight = MIN_DIMENSION;
+                        newWidth = Math.round(MIN_DIMENSION * aspectRatio);
+                    }
+                } else {
+                    // Image is taller than wide
+                    if (newWidth < MIN_DIMENSION) {
+                        newWidth = MIN_DIMENSION;
+                        newHeight = Math.round(MIN_DIMENSION / aspectRatio);
+                    }
+                }
             }
-
+            
+            // Then, handle maximum dimensions
+            if (newWidth > MAX_DIMENSION || newHeight > MAX_DIMENSION) {
+                if (aspectRatio > 1) {
+                    // Image is wider than tall
+                    if (newWidth > MAX_DIMENSION) {
+                        newWidth = MAX_DIMENSION;
+                        newHeight = Math.round(MAX_DIMENSION / aspectRatio);
+                    }
+                } else {
+                    // Image is taller than wide
+                    if (newHeight > MAX_DIMENSION) {
+                        newHeight = MAX_DIMENSION;
+                        newWidth = Math.round(MAX_DIMENSION * aspectRatio);
+                    }
+                }
+            }
+            
+            // Set canvas dimensions to our calculated values
             tempCanvas.width = newWidth;
             tempCanvas.height = newHeight;
+            
+            // Draw resized image
             const tempCtx = tempCanvas.getContext('2d');
             tempCtx.drawImage(image, 0, 0, newWidth, newHeight);
+            
+            console.log(`Original dimensions: ${image.width}x${image.height}`);
+            console.log(`Resized dimensions: ${newWidth}x${newHeight}`);
             
             return tempCanvas;
         }
@@ -288,6 +330,30 @@ Add min width/height and size up the picture if necessary
             const { offsetX, offsetY, scaleX, scaleY } = canvasMetrics;
             mouseX = (e.clientX - offsetX) * scaleX;
             mouseY = (e.clientY - offsetY) * scaleY;
+        }
+
+        function updateInteractionPosition(clientX, clientY) {
+            const { offsetX, offsetY, scaleX, scaleY } = canvasMetrics;
+            mouseX = (clientX - offsetX) * scaleX;
+            mouseY = (clientY - offsetY) * scaleY;
+        }
+
+        function handleStart(event) {
+            event.preventDefault();
+            const touch = event.type === 'touchstart' ? event.touches[0] : event;
+            updateInteractionPosition(touch.clientX, touch.clientY);
+        }
+
+        function handleMove(event) {
+            event.preventDefault();
+            const touch = event.type === 'touchmove' ? event.touches[0] : event;
+            updateInteractionPosition(touch.clientX, touch.clientY);
+        }
+
+        function handleEnd(event) {
+            event.preventDefault();
+            mouseX = -1;
+            mouseY = -1;
         }
 
         function processImage(image, resetState = true) {
@@ -490,6 +556,25 @@ Add min width/height and size up the picture if necessary
             mouseY = -1;
         });
         window.addEventListener('resize', calculateCanvasMetrics);
+
+               // Remove previous mouse event listeners and add unified interaction handlers
+               canvas.removeEventListener('mousemove', updateMousePosition);
+        canvas.removeEventListener('mouseleave', () => {
+            mouseX = -1;
+            mouseY = -1;
+        });
+
+        // Add unified mouse and touch event listeners
+        canvas.addEventListener('mousedown', handleStart, { passive: false });
+        canvas.addEventListener('mousemove', handleMove, { passive: false });
+        canvas.addEventListener('mouseup', handleEnd, { passive: false });
+        canvas.addEventListener('mouseleave', handleEnd, { passive: false });
+
+        // Add touch event listeners
+        canvas.addEventListener('touchstart', handleStart, { passive: false });
+        canvas.addEventListener('touchmove', handleMove, { passive: false });
+        canvas.addEventListener('touchend', handleEnd, { passive: false });
+        canvas.addEventListener('touchcancel', handleEnd, { passive: false });
 
         // Load default image on startup
         loadDefaultImage();
