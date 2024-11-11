@@ -1,8 +1,10 @@
-This is a generative art project which turns images into "force-field" particle animations in real-time. The project is open source (MIT license), so feel free to use it for whatever you wish.
+This is a generative art project which turns images into "force-field" particle animations in real-time. The animation effect uses a force repulsion / self-healing effect.
 
 Live demo: https://collidingscopes.github.io/forcefield/
 
 Upload your own image, use the GUI to control the animation parameters, and then use your mouse or touchscreen to activate the animation.
+
+This project is open source (offered under MIT license), so feel free to use it however you wish.
 
 If you liked this and are feeling generous, feel free to buy me a coffee. This would be much appreciated during late-night coding sessions!
 
