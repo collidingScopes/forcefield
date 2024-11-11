@@ -1,583 +1,111 @@
 <!--
 To do:
-Implement dat.gui styling on the right side
-Add footer and about section / coffee link
 Test mobile functionality
-- Touch and drag on mobile doesn't work
-Resize based on max height as well
-Ability to reduce screen flickering when there are many particles -- perhaps set a max particle count? 
-Re-order the GUI -- perhaps canvas size / # particles should be moved out the GUI and displayed in small font near the canvas
-Implement image / video record buttons and hotkeys
-Improve styling of the file input -- see other projects like video to ASCII
-Split in separate files
 Investigate ways to add slight randomness to the animation physics
-Add min width/height and size up the picture if necessary
 -->
 
 <!DOCTYPE html>
 <html lang="en">
-<title>Image to Particle Animation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <head>
-    <title>Image to Particle Animation</title>
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background-color: #02021e;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Force-Field Particle Animator</title>
 
-        #controls-container {
-            margin-bottom: 10px;
-            padding: 15px;
-            background: #333;
-            border-radius: 5px;
-            display: grid;
-            grid-template-columns: repeat(3, auto);
-            gap: 20px;
-            align-items: center;
-        }
-
-        .control-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .slider-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .slider-group label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9em;
-        }
-
-        button {
-            background: #4a4a4a;
-            border: none;
-            padding: 8px 16px;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        button:hover {
-            background: #5a5a5a;
-        }
-
-        input[type="range"] {
-            width: 150px;
-        }
-
-        canvas {
-            display: block;
-            max-width: 100%;
-            max-height: 90vh;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-            /* image-rendering: pixelated; */
-            cursor: crosshair;
-            border: 1px solid rgb(245, 242, 227);
-            touch-action: none; /* Prevent default touch behaviors */
-        }
-
-        #particleCount {
-            padding: 4px 8px;
-            background: #4a4a4a;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
-
-        /* New styles for info screen */
-        #infoScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0.9;
-        }
-
-        .info-content {
-            background: #1a1a1a;
-            padding: 2rem;
-            border-radius: 8px;
-            max-width: 600px;
-            position: relative;
-        }
-
-        .info-content h2 {
-            margin-top: 0;
-            color: #fff;
-        }
-
-        .info-content ul {
-            padding-left: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .info-content li {
-            margin-bottom: 0.5rem;
-        }
-
-        .close-button {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0.5rem;
-        }
-
-        .close-button:hover {
-            color: #ddd;
-        }
-    </style>
+    <link rel="icon" href="images/imageMageLogo.png">
+    <link rel="apple-touch-icon" href="images/imageMageLogo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+    <!-- <meta property="og:title" content="Image Mage" />
+    <meta property="og:description" content="Turn photos into comic book art, abstract paintings, pixel art, and more." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://imagemageage.github.io/" />
+    <meta property="og:image" content="https://imagemageage.github.io/images/siteOGImage2.png">
+    <meta property="og:image:type" content="image/png" >
+    <meta property="og:image:width" content="800" >
+    <meta property="og:image:height" content="798" > -->
+  
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tiny5&display=swap" rel="stylesheet">
+  
+    <link rel="stylesheet" href="styles.css">
+    <script type="text/javascript" src="dat.gui-master/build/dat.gui.min.js"></script>
+  
 </head>
 <body>
-    <!-- Info Screen -->
-    <div id="infoScreen">
-        <div class="info-content">
-            <button class="close-button" onclick="closeInfoScreen()">×</button>
-            <h2>Image-to-Particle-Animation</h2>
-            <p>Move your mouse across the image to create ripple effects</p>
-            <p>Adjust the sliders to control:</p>
-            <ul>
-              <li>Particle Density - number of particles shown</li>
-              <li>Mouse Radius - size of the ripple effect</li>
-              <li>Force Strength - intensity of the ripple</li>
-              <li>Healing Speed - how quickly particles return to their original position</li>
-            </ul>
-            <p>You can also upload your own images using the file input</p>
-            <button onclick="closeInfoScreen()">Get Started</button>
-        </div>
-    </div>
 
-    <div id="controls-container">
-        <div class="control-group">
-            <input type="file" id="imageInput" accept="image/*">
-            <button id="resetButton">Reset Image</button>
-        </div>
-        <div class="control-group">
-            <div class="slider-group">
-                <label>Particle Density <span id="densityValue">50%</span></label>
-                <input type="range" id="densitySlider" min="10" max="100" value="50">
-            </div>
-            <div class="slider-group">
-                <label>Mouse Radius <span id="radiusValue">150px</span></label>
-                <input type="range" id="radiusSlider" min="20" max="400" value="150">
-            </div>
-            <div class="slider-group">
-                <label>Force Strength <span id="forceValue">0.8</span></label>
-                <input type="range" id="forceSlider" min="100" max="2000" value="400">
-            </div>
-            <div class="slider-group">
-                <label>Healing Speed <span id="healingValue">0.002</span></label>
-                <input type="range" id="healingSlider" min="0" max="100" value="30">
-            </div>
-        </div>
-        <div class="control-group">
-            <span>Particles: </span>
-            <span id="particleCount">0</span>
-        </div>
-    </div>
+  <div id="gui"></div>
+  <div id="canvasContainer">
     <canvas id="canvas"></canvas>
+  </div>
 
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d', {willReadFrequently: true});
-        const imageInput = document.getElementById('imageInput');
-        const densitySlider = document.getElementById('densitySlider');
-        const radiusSlider = document.getElementById('radiusSlider');
-        const forceSlider = document.getElementById('forceSlider');
-        const healingSlider = document.getElementById('healingSlider');
-        const resetButton = document.getElementById('resetButton');
-        const particleCountDisplay = document.getElementById('particleCount');
-        const densityValue = document.getElementById('densityValue');
-        const radiusValue = document.getElementById('radiusValue');
-        const forceValue = document.getElementById('forceValue');
-        const healingValue = document.getElementById('healingValue');
-        
-        let particles;
-        let particleInitialPositions;
-        let particleColors;
-        let width;
-        let height;
-        let particleCount;
-        let mouseX = -1, mouseY = -1;
-        let mouseRadius = 100;
-        let repelForce = 0.5;
-        let healingFactor = 0.030;
-        let animationId;
-        let currentImage = null;
-        const canvasMetrics = {};
-        let frameCounter = 0;
-        const MIN_DIMENSION = 500;
-        const MAX_DIMENSION = 1000;
+  <table id="buttonTable">
+    <tr>
+        <td>
+            <label for="fileInput" class="custom-file-upload" id="fileInputLabel">
+                <i class="fa fa-cloud-upload"></i> Upload Image
+            </label>
+            <input type="file" id="fileInput" accept="image/*">
+        </td>
+        <td id="canvasSizeCell"></td>
+        <td id="particleCountCell"></td>
+    </tr>
+  </table>
 
-        // Info screen functions
-        function closeInfoScreen() {
-            const infoScreen = document.getElementById('infoScreen');
-            infoScreen.style.opacity = '0.0';
-            infoScreen.style.transition = 'opacity 0.3s ease-out';
-            setTimeout(() => {
-                infoScreen.style.display = 'none';
-            }, 300);
-        }
+  <div id="videoRecordingMessageDiv" class="hidden sticky-bottom">
+    Video recording underway. Press menu button or "v" to stop. The video will be saved to your downloads folder afterwards.
+  </div>
 
-        function resizeImage(image) {
-            const tempCanvas = document.createElement('canvas');
-            
-            // Calculate aspect ratio
-            const aspectRatio = image.width / image.height;
-            
-            // Initialize new dimensions
-            let newWidth = image.width;
-            let newHeight = image.height;
-            
-            // First, handle minimum dimensions
-            if (newWidth < MIN_DIMENSION || newHeight < MIN_DIMENSION) {
-                if (aspectRatio > 1) {
-                    // Image is wider than tall
-                    if (newHeight < MIN_DIMENSION) {
-                        newHeight = MIN_DIMENSION;
-                        newWidth = Math.round(MIN_DIMENSION * aspectRatio);
-                    }
-                } else {
-                    // Image is taller than wide
-                    if (newWidth < MIN_DIMENSION) {
-                        newWidth = MIN_DIMENSION;
-                        newHeight = Math.round(MIN_DIMENSION / aspectRatio);
-                    }
-                }
-            }
-            
-            // Then, handle maximum dimensions
-            if (newWidth > MAX_DIMENSION || newHeight > MAX_DIMENSION) {
-                if (aspectRatio > 1) {
-                    // Image is wider than tall
-                    if (newWidth > MAX_DIMENSION) {
-                        newWidth = MAX_DIMENSION;
-                        newHeight = Math.round(MAX_DIMENSION / aspectRatio);
-                    }
-                } else {
-                    // Image is taller than wide
-                    if (newHeight > MAX_DIMENSION) {
-                        newHeight = MAX_DIMENSION;
-                        newWidth = Math.round(MAX_DIMENSION * aspectRatio);
-                    }
-                }
-            }
-            
-            // Set canvas dimensions to our calculated values
-            tempCanvas.width = newWidth;
-            tempCanvas.height = newHeight;
-            
-            // Draw resized image
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCtx.drawImage(image, 0, 0, newWidth, newHeight);
-            
-            console.log(`Original dimensions: ${image.width}x${image.height}`);
-            console.log(`Resized dimensions: ${newWidth}x${newHeight}`);
-            
-            return tempCanvas;
-        }
+  <div id="infoScreen">
+    <div class="info-content">
+        <button class="close-info-button" onclick="closeInfoScreen()">×</button>
+        <h2>Force-Field Particle Animator</h2>
+        <p>Move your mouse / drag across the image to create force-field ripple effects</p>
+        <p>Adjust the sliders to control:</p>
+        <ul>
+          <li>Particle density</li>
+          <li>Effect radius</li>
+          <li>Force strength</li>
+          <li>Self-healing speed</li>
+        </ul>
+        <p>You can also upload your own images as the starting canvas</p>
+        <p>Enjoy!</p>
+        <button class="close-info-button-2" onclick="closeInfoScreen()">Use the Force 🧙</button>
+    </div>
+  </div>
 
-        function updateControls() {
-            particleCountDisplay.textContent = particleCount.toLocaleString();
-            densityValue.textContent = `${densitySlider.value}`;
-            radiusValue.textContent = `${radiusSlider.value}px`;
-            forceValue.textContent = (forceSlider.value / 100).toFixed(2);
-            healingValue.textContent = (healingSlider.value);
-        }
+  <div id="notesDiv">
+    <div id="textBox">
+        <h2 id="aboutText">Force-Field Particle Animator</h2>
+        <p>This is a generative art / animation project. The project is open source, so feel free to use it for whatever you wish.</p>
+        <p>There are a few hotkeys which can speed up using the tool:</p>
+        <ul>
+            <li>Press <b>"r"</b> to reset the canvas. This will move all particles back to their original position in the source image</li>
+            <li>Press <b>"s"</b> to save a screenshot of the current state of the animation (png image)</li>
+            <li>Press <b>"v"</b> to start recording a video of the animation. Press v again to stop the recording. An mp4 video file will be exported to your downloads folder afterwards</li>
+        </ul>
+        <p>If you liked this and are feeling generous, feel free to buy me a coffee. This would be much appreciated during late-night coding sessions!</p>
+        <a href="https://www.buymeacoffee.com/stereoDrift" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png" alt="Buy Me A Coffee"></a>
+        <p>This project is coded using Javascript, HTML, and CSS (see github repo linked below). Video creation and encoding is done using mp4 muxer.</p>
+        <p>Feel free to reach out to discuss, ask questions, or to share your creations! The animations can be easily uploaded to instagram or otherwise -- you can tag me <a href="https://www.instagram.com/stereo.drift/" target="_blank" rel="noopener">@stereo.drift</a> :)</p>
+    </div>
+  </div>
 
-        function calculateCanvasMetrics() {
-            const rect = canvas.getBoundingClientRect();
-            const aspectRatioCanvas = width / height;
-            const aspectRatioRect = rect.width / rect.height;
+  <div id="linksDiv">
+      <table id="infoMenuTable">
+          <tr>
+              <td><button id="gitHubButton"class="socialMediaButton"><a href="https://github.com/collidingScopes/particles" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i></a></button></td>
+              <td><button id="coffeeButton" class="socialMediaButton"><a href="https://www.buymeacoffee.com/stereoDrift" target="_blank" rel="noopener"><i class="fa-solid fa-heart"></i></a></button></td>
+              <td><button id="instagramButton" class="socialMediaButton"><a href="https://www.instagram.com/stereo.drift/" target="_blank" rel="noopener"><i class="fa-brands fa-instagram"></i></a></button></td>
+              <td><button id="emailButton" class="socialMediaButton"><a href="mailto:stereodriftvisuals@gmail.com" target="_blank" rel="noopener"><i class="fa-solid fa-envelope"></i></a></button></td>
+          </tr>
+      </table>
+  </div>
 
-            const isCanvasWider = aspectRatioCanvas > aspectRatioRect;
-            const displayedWidth = isCanvasWider ? rect.width : rect.height * aspectRatioCanvas;
-            const displayedHeight = isCanvasWider ? rect.width / aspectRatioCanvas : rect.height;
-
-            canvasMetrics.offsetX = (rect.width - displayedWidth) / 2 + rect.left;
-            canvasMetrics.offsetY = (rect.height - displayedHeight) / 2 + rect.top;
-            canvasMetrics.scaleX = width / displayedWidth;
-            canvasMetrics.scaleY = height / displayedHeight;
-        }
-
-        function updateMousePosition(e) {
-            const { offsetX, offsetY, scaleX, scaleY } = canvasMetrics;
-            mouseX = (e.clientX - offsetX) * scaleX;
-            mouseY = (e.clientY - offsetY) * scaleY;
-        }
-
-        function updateInteractionPosition(clientX, clientY) {
-            const { offsetX, offsetY, scaleX, scaleY } = canvasMetrics;
-            mouseX = (clientX - offsetX) * scaleX;
-            mouseY = (clientY - offsetY) * scaleY;
-        }
-
-        function handleStart(event) {
-            event.preventDefault();
-            const touch = event.type === 'touchstart' ? event.touches[0] : event;
-            updateInteractionPosition(touch.clientX, touch.clientY);
-        }
-
-        function handleMove(event) {
-            event.preventDefault();
-            const touch = event.type === 'touchmove' ? event.touches[0] : event;
-            updateInteractionPosition(touch.clientX, touch.clientY);
-        }
-
-        function handleEnd(event) {
-            event.preventDefault();
-            mouseX = -1;
-            mouseY = -1;
-        }
-
-        function processImage(image, resetState = true) {
-            if (resetState) {
-                currentImage = image;
-            }
-
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-            }
-
-            // Resize image if necessary
-            const resizedCanvas = resizeImage(image);
-            width = canvas.width = resizedCanvas.width;
-            height = canvas.height = resizedCanvas.height;
-            console.log("Canvas w/h dimensions: "+width+", "+height);
-
-            ctx.drawImage(resizedCanvas, 0, 0);
-            const imageData = ctx.getImageData(0, 0, width, height);
-            const pixels = new Uint32Array(imageData.data.buffer);
-
-            const density = densitySlider.value / 100;
-            particleCount = Math.floor((width * height * density)) * 1.5;
-
-            particles = new Float32Array(particleCount * 4);
-            particleInitialPositions = new Float32Array(particleCount * 2);
-            particleColors = new Uint32Array(particleCount);
-            let initialParticleSpacing = 100/densitySlider.value;
-
-            for (let i = 0; i < particleCount; i++) {
-                const idx = i * 4;
-                const posIdx = i * 2;
-                
-                const x =  Math.random() * width;
-                const y = Math.random() * height;
-
-                // const x = Math.round((i*initialParticleSpacing) % width);
-                // const y = Math.floor((i*initialParticleSpacing) / width);
-
-                particles[idx] = x;
-                particles[idx + 1] = y;
-                particles[idx + 2] = 0;
-                particles[idx + 3] = 0;
-                
-                particleInitialPositions[posIdx] = x;
-                particleInitialPositions[posIdx + 1] = y;
-
-                const pixelX = Math.min(Math.floor(x), width - 1);
-                const pixelY = Math.min(Math.floor(y), height - 1);
-                const pixelIndex = pixelY * width + pixelX;
-                particleColors[i] = pixels[pixelIndex];
-            }
-
-            updateControls();
-            calculateCanvasMetrics();
-            animate();
-        }
-
-        function animate() {
-            mouseRadius = parseInt(radiusSlider.value) + (Math.sin(frameCounter/10)/2 * parseInt(radiusSlider.value));
-            repelForce = parseInt(forceSlider.value) / 100;
-            healingFactor = parseInt(healingSlider.value) / 25000;
-            
-            const radiusSq = mouseRadius * mouseRadius;
-            const imageData = ctx.createImageData(width, height);
-            const data = new Uint32Array(imageData.data.buffer);
-
-            data.fill(0);
-
-            for (let i = 0; i < particleCount; i++) {
-                const idx = i * 4;
-                const posIdx = i * 2;
-
-                const px = particles[idx];
-                const py = particles[idx + 1];
-                const initialX = particleInitialPositions[posIdx];
-                const initialY = particleInitialPositions[posIdx + 1];
-
-                if (mouseX >= 0 && mouseY >= 0) {
-                    const dx = px - mouseX;
-                    const dy = py - mouseY;
-                    const distanceSq = dx * dx + dy * dy;
-
-                    if (distanceSq < radiusSq && distanceSq > 0) {
-                        const distance = distanceSq ** 0.5;
-                        const effectStrength = (1 - distance / mouseRadius) * repelForce;
-                        particles[idx + 2] += (dx / distance) * effectStrength;
-                        particles[idx + 3] += (dy / distance) * effectStrength;
-                    }
-                }
-
-                particles[idx + 2] += (initialX - px) * healingFactor;
-                particles[idx + 3] += (initialY - py) * healingFactor;
-
-                particles[idx] += particles[idx + 2];
-                particles[idx + 1] += particles[idx + 3];
-
-                particles[idx + 2] *= 0.95;
-                particles[idx + 3] *= 0.95;
-
-                if (particles[idx] < 0) {
-                    particles[idx] = 0;
-                    particles[idx + 2] *= -0.5;
-                } else if (particles[idx] >= width) {
-                    particles[idx] = width - 1;
-                    particles[idx + 2] *= -0.5;
-                }
-
-                if (particles[idx + 1] < 0) {
-                    particles[idx + 1] = 0;
-                    particles[idx + 3] *= -0.5;
-                } else if (particles[idx + 1] >= height) {
-                    particles[idx + 1] = height - 1;
-                    particles[idx + 3] *= -0.5;
-                }
-
-                const x = Math.round(particles[idx]);
-                const y = Math.round(particles[idx + 1]);
-                const pixelIndex = y * width + x;
-                data[pixelIndex] = particleColors[i];
-            }
-
-            ctx.putImageData(imageData, 0, 0);
-            frameCounter++;
-            animationId = requestAnimationFrame(animate);
-        }
-
-        function loadDefaultImage() {
-            const defaultImage = new Image();
-            defaultImage.onload = () => processImage(defaultImage);
-            defaultImage.onerror = () => {
-                console.error('Error loading default image. Please upload your own image.');
-                createFallbackImage();
-            };
-            defaultImage.src = 'waterRipple.png';
-        }
-
-        // Optional fallback function in case the default image fails to load
-        function createFallbackImage() {
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = 500;  // Default size if no image loads
-            tempCanvas.height = 500;
-            const tempCtx = tempCanvas.getContext('2d');
-            
-            // Create a gradient
-            const gradient = tempCtx.createLinearGradient(0, 0, 500, 500);
-            gradient.addColorStop(0, '#f5c851');
-            gradient.addColorStop(0.5, '#63a48e');
-            gradient.addColorStop(1, '#0e7395');
-            
-            tempCtx.fillStyle = gradient;
-            tempCtx.fillRect(0, 0, 500, 500);
-            
-            // Use this as our source image
-            processImage(tempCanvas);
-        }
-
-        // Event Listeners
-        imageInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const image = new Image();
-                    image.onload = () => processImage(image);
-                    image.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        densitySlider.addEventListener('input', () => {
-            if (currentImage) {
-                processImage(currentImage);
-            }
-        });
-
-        // Update values without resetting for these sliders
-        radiusSlider.addEventListener('input', () => {
-            radiusValue.textContent = `${radiusSlider.value}px`;
-        });
-
-        forceSlider.addEventListener('input', () => {
-            forceValue.textContent = (forceSlider.value / 100).toFixed(2);
-        });
-
-        healingSlider.addEventListener('input', () => {
-            healingValue.textContent = (healingSlider.value);
-        });
-
-        resetButton.addEventListener('click', () => {
-            if (currentImage) {
-                processImage(currentImage);
-            }
-        });
-
-        canvas.addEventListener('mousemove', updateMousePosition);
-        canvas.addEventListener('mouseleave', () => {
-            mouseX = -1;
-            mouseY = -1;
-        });
-        window.addEventListener('resize', calculateCanvasMetrics);
-
-               // Remove previous mouse event listeners and add unified interaction handlers
-               canvas.removeEventListener('mousemove', updateMousePosition);
-        canvas.removeEventListener('mouseleave', () => {
-            mouseX = -1;
-            mouseY = -1;
-        });
-
-        // Add unified mouse and touch event listeners
-        canvas.addEventListener('mousedown', handleStart, { passive: false });
-        canvas.addEventListener('mousemove', handleMove, { passive: false });
-        canvas.addEventListener('mouseup', handleEnd, { passive: false });
-        canvas.addEventListener('mouseleave', handleEnd, { passive: false });
-
-        // Add touch event listeners
-        canvas.addEventListener('touchstart', handleStart, { passive: false });
-        canvas.addEventListener('touchmove', handleMove, { passive: false });
-        canvas.addEventListener('touchend', handleEnd, { passive: false });
-        canvas.addEventListener('touchcancel', handleEnd, { passive: false });
-
-        // Load default image on startup
-        loadDefaultImage();
-    </script>
 </body>
+<script src="mp4-muxer-main/build/mp4-muxer.js"></script>
+<script src="colorFunctions.js"></script>
+<script src="canvasVideoExport.js"></script>
+<script src="imageParticles.js"></script>
 </html>
