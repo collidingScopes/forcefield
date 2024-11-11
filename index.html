@@ -10,14 +10,14 @@
     <link rel="apple-touch-icon" href="images/imageMageLogo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   
-    <!-- <meta property="og:title" content="Image Mage" />
-    <meta property="og:description" content="Turn photos into comic book art, abstract paintings, pixel art, and more." />
+    <meta property="og:title" content="Force-Field Particle Animator" />
+    <meta property="og:description" content="turns images into force-field particle animations in realtime" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://imagemageage.github.io/" />
+    <meta property="og:url" content="https://collidingscopes.github.io/forcefield/" />
     <meta property="og:image" content="https://imagemageage.github.io/images/siteOGImage2.png">
     <meta property="og:image:type" content="image/png" >
     <meta property="og:image:width" content="800" >
-    <meta property="og:image:height" content="798" > -->
+    <meta property="og:image:height" content="798" >
   
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,18 +34,20 @@
     <canvas id="canvas"></canvas>
   </div>
 
-  <table id="buttonTable">
-    <tr>
-        <td>
-            <label for="fileInput" class="custom-file-upload" id="fileInputLabel">
-                <i class="fa fa-cloud-upload"></i> Upload Image
-            </label>
-            <input type="file" id="fileInput" accept="image/*">
-        </td>
-        <td id="canvasSizeCell"></td>
-        <td id="particleCountCell"></td>
-    </tr>
-  </table>
+  <div class="tableContainer">
+    <table id="buttonTable">
+      <tr>
+          <td>
+              <label for="fileInput" class="custom-file-upload" id="fileInputLabel">
+                  <i class="fa fa-cloud-upload"></i> Upload Image
+              </label>
+              <input type="file" id="fileInput" accept="image/*">
+          </td>
+          <td id="canvasSizeCell"></td>
+          <td id="particleCountCell"></td>
+      </tr>
+    </table>
+  </div>
 
   <div id="videoRecordingMessageDiv" class="hidden sticky-bottom">
     Video recording underway. Press menu button or "v" to stop. The video will be saved to your downloads folder afterwards.
@@ -72,8 +74,9 @@
   <div id="notesDiv">
     <div id="textBox">
         <h2 id="aboutText">Force-Field Particle Animator</h2>
-        <p>This is a generative art project which turns images into "force-field" particle animations. The project is open source, so feel free to use it for whatever you wish.</p>
-        <p>Upload your own image, use the GUI to control the animation parameters, and then use your mouse or touchscreen to activate the animation.</p>
+        <p>This is a generative art project which turns images into "force-field" particle animations in real-time. The animation effect uses a force repulsion / self-healing effect.</p>
+        <p>Upload your own image, open the GUI controls to change the animation parameters, and then use your mouse or touchscreen to activate the animation.</p>
+        <p>This project is open source (offered under MIT license), so feel free to use it however you wish.</p>
         <p>There are a few hotkeys which can speed up using the tool:</p>
         <ul>
             <li>Press <b>"r"</b> to reset the canvas. This will move all particles back to their original position in the source image</li>

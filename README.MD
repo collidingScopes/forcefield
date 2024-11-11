@@ -2,7 +2,7 @@ This is a generative art project which turns images into "force-field" particle 
 
 Live demo: https://collidingscopes.github.io/forcefield/
 
-Upload your own image, use the GUI to control the animation parameters, and then use your mouse or touchscreen to activate the animation.
+Upload your own image, open the GUI controls to change the animation parameters, and then use your mouse or touchscreen to activate the animation.
 
 This project is open source (offered under MIT license), so feel free to use it however you wish.
 
