@@ -28,6 +28,11 @@ html, body {
   height: 0px;
 }
 
+.close-button {
+  background-color: rgb(111, 8, 132) !important;
+  font-size: 1.5em;
+}
+
 canvas {
     display: block;
     max-width: 95%;

@@ -36,7 +36,8 @@ var obj = {
 };
 
 var gui = new dat.gui.GUI( { autoPlace: false } );
-var guiOpenToggle = true;
+gui.close();
+var guiOpenToggle = false;
 
 gui.add(obj, "particleDensity").min(10).max(100).step(1).name('Particle Density').onFinishChange(resetCanvas);
 gui.add(obj, "effectRadius").min(20).max(400).step(1).name('Effect Radius');
