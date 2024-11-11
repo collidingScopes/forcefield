@@ -1,3 +1,9 @@
+/*
+To do:
+Fix big where touch interaction can break or become unsynced with screen position (usually after scrolling the page)
+Investigate ways to add slight randomness to the animation physics
+*/
+
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d', {willReadFrequently: true});
 const fileInput = document.getElementById('fileInput');
@@ -355,7 +361,15 @@ function loadDefaultImage() {
         console.error('Error loading default image. Please upload your own image.');
         createFallbackImage();
     };
-    defaultImage.src = 'waterRipple.png';
+    
+    let random = Math.random()
+    if(random<0.33){
+      defaultImage.src = 'images/waterRipple.png';
+    } else if(random<0.67){
+      defaultImage.src = 'images/moons.png';
+    } else {
+      defaultImage.src = 'images/lavaLamp.png';
+    }
 }
 
 // Optional fallback function in case the default image fails to load

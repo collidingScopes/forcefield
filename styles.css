@@ -75,7 +75,10 @@ canvas {
 .info-content h2 {
     margin-top: 0;
     color: #fff;
-    font-size: 1.3em;
+    font-size: 36px;
+    font-family: "Jersey 20", sans-serif;
+    font-weight: 400;
+    font-style: normal;
 }
 
 .info-content ul {
@@ -107,11 +110,16 @@ canvas {
 }
 
 .close-info-button-2 {
-  font-size: 1.1em;
+  font-size: 30px;
   border: 3px solid rgb(230, 244, 248);
   border-radius: 5px;
   background-color: #a3e3da;
-  color: rgb(4, 59, 72);
+  color: rgb(2, 40, 49);
+
+  font-family: "Jersey 20", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+
 }
 
 #introDiv{
@@ -145,10 +153,21 @@ canvas {
 }
 
 #aboutText{
-  font-size: 32px;
-  font-family: "Tiny5";
+  font-size: 48px;
+
+  font-family: "Jersey 20", sans-serif;
   font-weight: 400;
   font-style: normal;
+
+  /* font-family: "Doto", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 800;
+  font-style: normal;
+  font-variation-settings: "ROND" 100; */
+
+  /* font-family: "Tiny5";
+  font-weight: 400;
+  font-style: normal;*/
   display:block;
   padding: 0;
   margin: 0;
